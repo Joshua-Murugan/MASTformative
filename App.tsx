@@ -1,17 +1,45 @@
 import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import HomeScreen from "./HomeScreen";
+import ManageMenuScreen from "./ManageMenuScreen";
+import { MenuItem } from "./MenuTypes";
 
-// Minimal HomeScreen inlined to avoid a missing-module error.
-// Replace this with an imported ./HomeScreen component when you add that file.
-const HomeScreen: React.FC = () => {
-  // Placeholder UI; return null so this is safe in both web and native builds.
-  return null;
+// Define the type for our navigation stack parameters
+export type RootStackParamList = {
+  Home: { newItem?: MenuItem };
+  ManageMenu: undefined;
 };
 
-// Lightweight App entrypoint. Navigation libraries were removed to keep
-// the project runnable without installing extra native deps. If you want
-// navigation back, reinstall and re-enable @react-navigation packages.
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
 const App: React.FC = () => {
-  return <HomeScreen />;
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="Home"
+        screenOptions={{
+          headerStyle: { backgroundColor: "#1a1a1a" },
+          headerTintColor: "#ffd700",
+        }}
+      >
+        <Stack.Screen 
+          name="Home" 
+          component={HomeScreen}
+          options={{
+            title: "Chef's Menu",
+          }}
+        />
+        <Stack.Screen 
+          name="ManageMenu" 
+          component={ManageMenuScreen}
+          options={{
+            title: "Add Menu Item",
+          }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 };
 
 export default App;

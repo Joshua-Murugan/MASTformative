@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,27 +9,36 @@ import {
   ImageBackground,
   TouchableOpacity,
 } from "react-native";
-import MenuForm from "./MenuForm";
 import MenuList from "./MenuList";
 import { MenuItem } from "./MenuTypes";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "./App";
 
-const HomeScreen: React.FC = () => {
+type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+
+const HomeScreen: React.FC<Props> = ({ navigation, route }) => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  // keep animated values in a ref that persists across renders
   const fadeAnimsRef = useRef<Animated.Value[]>([]);
 
-  const addMenuItem = (item: MenuItem) => {
-    const anim = new Animated.Value(0);
-    fadeAnimsRef.current.push(anim);
-    setMenuItems((prev) => [...prev, item]);
+  // Handle new items added from ManageMenu screen
+  useEffect(() => {
+    if (route.params?.newItem) {
+      const item = route.params.newItem;
+      const anim = new Animated.Value(0);
+      fadeAnimsRef.current.push(anim);
+      setMenuItems((prev) => [...prev, item]);
 
-    const index = fadeAnimsRef.current.length - 1;
-    Animated.timing(fadeAnimsRef.current[index], {
-      toValue: 1,
-      duration: 600,
-      useNativeDriver: true,
-    }).start();
-  };
+      const index = fadeAnimsRef.current.length - 1;
+      Animated.timing(fadeAnimsRef.current[index], {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }).start();
+
+      // Clear the parameter after handling
+      navigation.setParams({ newItem: undefined });
+    }
+  }, [route.params?.newItem]);
 
   const resetMenu = () => {
     setMenuItems([]);
@@ -44,9 +53,14 @@ const HomeScreen: React.FC = () => {
       style={styles.bg}
     >
       <SafeAreaView style={styles.container}>
-        <Text style={styles.header}>🍴 Chef Christoffel’s Menu</Text>
+        <Text style={styles.header}>🍴 Chef Christoffel's Menu</Text>
 
-        <MenuForm onAddItem={addMenuItem} />
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => navigation.navigate('ManageMenu')}
+        >
+          <Text style={styles.addButtonText}>Add New Menu Item</Text>
+        </TouchableOpacity>
 
         {menuItems.length > 0 && (
           <TouchableOpacity style={styles.resetButton} onPress={resetMenu}>
@@ -71,8 +85,6 @@ const HomeScreen: React.FC = () => {
   );
 };
 
-export default HomeScreen;
-
 const styles = StyleSheet.create({
   bg: { flex: 1 },
   container: {
@@ -93,6 +105,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginVertical: 10,
   },
+  addButton: {
+    backgroundColor: "#ffd700",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  addButtonText: {
+    color: "#1a1a1a",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
   resetButton: {
     backgroundColor: "#ff4444",
     padding: 8,
@@ -102,3 +126,5 @@ const styles = StyleSheet.create({
   },
   resetText: { color: "#fff", fontWeight: "bold" },
 });
+
+export default HomeScreen;
