@@ -1,8 +1,13 @@
 Project: Chef Christoffel’s Menu Management App
+
 Student: Joshua Cadulay Murugan
+
 Student Number: ST10497889
+
 Date: 13/11/2025
+
 Version:(Final PoE Version)
+
 Overview
 
 This update refactors and enhances the original React Native (TypeScript) menu app to meet all the final PoE requirements. The new version introduces a clearer screen structure, new features, and smoother functionality for both chefs and guests.
