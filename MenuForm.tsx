@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { MenuItem } from "./MenuTypes";
 
 interface Props {
@@ -25,20 +18,16 @@ const MenuForm: React.FC<Props> = ({ onAddItem }) => {
       return;
     }
 
-    if (isNaN(Number(price))) {
-      Alert.alert("Invalid input", "Price must be a number");
-      return;
-    }
-
     const newItem: MenuItem = {
       id: Date.now().toString(),
-      name: name.trim(),
-      description: desc.trim(),
+      name,
+      description: desc,
       course,
-      price: Number(price).toFixed(2),
+      price: parseFloat(price).toFixed(2),
     };
 
     onAddItem(newItem);
+    Alert.alert("Item Added", `${name} has been added to the menu.`);
     setName("");
     setDesc("");
     setCourse("Starters");

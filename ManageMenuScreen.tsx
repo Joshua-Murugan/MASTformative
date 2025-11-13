@@ -1,17 +1,18 @@
-import React from 'react';
-import { View, StyleSheet, ImageBackground } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import MenuForm from './MenuForm';
-import { MenuItem } from './MenuTypes';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from './App';
+import React from "react";
+import { StyleSheet, ImageBackground } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import MenuForm from "./MenuForm";
+import { MenuItem } from "./MenuTypes";
 
-type Props = NativeStackScreenProps<RootStackParamList, 'ManageMenu'>;
+interface Props {
+  navigation: any;
+  addMenuItem: (item: MenuItem) => void;
+}
 
-const ManageMenuScreen: React.FC<Props> = ({ navigation }) => {
-  const handleAddItem = (item: MenuItem) => {
-    // Navigate back to home screen and pass the new item
-    navigation.navigate('Home', { newItem: item });
+const ManageMenuScreen: React.FC<Props> = ({ navigation, addMenuItem }) => {
+  const handleAdd = (item: MenuItem) => {
+    addMenuItem(item);
+    navigation.goBack();
   };
 
   return (
@@ -22,16 +23,14 @@ const ManageMenuScreen: React.FC<Props> = ({ navigation }) => {
       style={styles.bg}
     >
       <SafeAreaView style={styles.container}>
-        <MenuForm onAddItem={handleAddItem} />
+        <MenuForm onAddItem={handleAdd} />
       </SafeAreaView>
     </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  bg: { 
-    flex: 1 
-  },
+  bg: { flex: 1 },
   container: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.65)",

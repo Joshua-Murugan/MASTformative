@@ -1,48 +1,31 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
   StyleSheet,
+  TouchableOpacity,
   FlatList,
   SafeAreaView,
-  Animated,
   ImageBackground,
-  TouchableOpacity,
 } from "react-native";
-import MenuList from "./MenuList";
-import { MenuItem } from "./MenuTypes";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "./App";
+import { MenuItem } from "./MenuTypes";
+import MenuList from "./MenuList";
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+type Props = NativeStackScreenProps<RootStackParamList, "Home"> & {
+  menuItems: MenuItem[];
+  removeMenuItem: (id: string) => void;
+};
 
-const HomeScreen: React.FC<Props> = ({ navigation, route }) => {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const fadeAnimsRef = useRef<Animated.Value[]>([]);
-
-  // Handle new items added from ManageMenu screen
-  useEffect(() => {
-    if (route.params?.newItem) {
-      const item = route.params.newItem;
-      const anim = new Animated.Value(0);
-      fadeAnimsRef.current.push(anim);
-      setMenuItems((prev) => [...prev, item]);
-
-      const index = fadeAnimsRef.current.length - 1;
-      Animated.timing(fadeAnimsRef.current[index], {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }).start();
-
-      // Clear the parameter after handling
-      navigation.setParams({ newItem: undefined });
-    }
-  }, [route.params?.newItem]);
-
-  const resetMenu = () => {
-    setMenuItems([]);
-    fadeAnimsRef.current = [];
+const HomeScreen: React.FC<Props> = ({ navigation, menuItems, removeMenuItem }) => {
+  const averageByCourse = (course: string) => {
+    const filtered = menuItems.filter((i) => i.course === course);
+    if (filtered.length === 0) return "0.00";
+    const avg =
+      filtered.reduce((sum, i) => sum + parseFloat(i.price), 0) /
+      filtered.length;
+    return avg.toFixed(2);
   };
 
   return (
@@ -55,30 +38,35 @@ const HomeScreen: React.FC<Props> = ({ navigation, route }) => {
       <SafeAreaView style={styles.container}>
         <Text style={styles.header}>🍴 Chef Christoffel's Menu</Text>
 
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => navigation.navigate('ManageMenu')}
-        >
-          <Text style={styles.addButtonText}>Add New Menu Item</Text>
-        </TouchableOpacity>
-
-        {menuItems.length > 0 && (
-          <TouchableOpacity style={styles.resetButton} onPress={resetMenu}>
-            <Text style={styles.resetText}>Reset Menu</Text>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate("ManageMenu")}
+          >
+            <Text style={styles.addButtonText}>Add Menu Item</Text>
           </TouchableOpacity>
-        )}
 
-        <Text style={styles.counter}>Total Items: {menuItems.length}</Text>
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={() => navigation.navigate("Filter", { menuItems })}
+          >
+            <Text style={styles.addButtonText}>Filter Menu</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.avgContainer}>
+          <Text style={styles.avgText}>⭐ Average Prices by Course</Text>
+          <Text style={styles.avgItem}>Starters: R {averageByCourse("Starters")}</Text>
+          <Text style={styles.avgItem}>Mains: R {averageByCourse("Mains")}</Text>
+          <Text style={styles.avgItem}>Dessert: R {averageByCourse("Dessert")}</Text>
+        </View>
 
         <FlatList
           data={menuItems}
           keyExtractor={(item) => item.id}
-          renderItem={({ item, index }) => (
-            <Animated.View style={{ opacity: fadeAnimsRef.current[index] || 1 }}>
-              <MenuList item={item} />
-            </Animated.View>
+          renderItem={({ item }) => (
+            <MenuList item={item} onRemove={() => removeMenuItem(item.id)} />
           )}
-          style={{ marginTop: 10 }}
         />
       </SafeAreaView>
     </ImageBackground>
@@ -97,34 +85,32 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#ffd700",
     textAlign: "center",
-    marginVertical: 12,
+    marginBottom: 10,
   },
-  counter: {
-    color: "#fff",
-    fontSize: 16,
-    textAlign: "center",
-    marginVertical: 10,
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   addButton: {
     backgroundColor: "#ffd700",
-    padding: 12,
+    padding: 10,
     borderRadius: 8,
+    flex: 1,
+    marginRight: 5,
     alignItems: "center",
-    marginBottom: 10,
   },
-  addButtonText: {
-    color: "#1a1a1a",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  resetButton: {
-    backgroundColor: "#ff4444",
-    padding: 8,
+  filterButton: {
+    backgroundColor: "#00cc99",
+    padding: 10,
     borderRadius: 8,
+    flex: 1,
+    marginLeft: 5,
     alignItems: "center",
-    marginBottom: 10,
   },
-  resetText: { color: "#fff", fontWeight: "bold" },
+  addButtonText: { color: "#1a1a1a", fontWeight: "bold" },
+  avgContainer: { marginVertical: 10 },
+  avgText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  avgItem: { color: "#ffd700" },
 });
 
 export default HomeScreen;

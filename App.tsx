@@ -1,19 +1,30 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./HomeScreen";
 import ManageMenuScreen from "./ManageMenuScreen";
+import FilterScreen from "./FilterScreen";
 import { MenuItem } from "./MenuTypes";
 
-// Define the type for our navigation stack parameters
 export type RootStackParamList = {
-  Home: { newItem?: MenuItem };
+  Home: undefined;
   ManageMenu: undefined;
+  Filter: { menuItems: MenuItem[] };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const App: React.FC = () => {
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+
+  const addMenuItem = (item: MenuItem) => {
+    setMenuItems((prev) => [...prev, item]);
+  };
+
+  const removeMenuItem = (id: string) => {
+    setMenuItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -23,19 +34,24 @@ const App: React.FC = () => {
           headerTintColor: "#ffd700",
         }}
       >
-        <Stack.Screen 
-          name="Home" 
-          component={HomeScreen}
-          options={{
-            title: "Chef's Menu",
-          }}
-        />
-        <Stack.Screen 
-          name="ManageMenu" 
-          component={ManageMenuScreen}
-          options={{
-            title: "Add Menu Item",
-          }}
+        <Stack.Screen name="Home" options={{ title: "Chef's Menu" }}>
+          {(props) => (
+            <HomeScreen
+              {...props}
+              menuItems={menuItems}
+              removeMenuItem={removeMenuItem}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="ManageMenu" options={{ title: "Add Menu Item" }}>
+          {(props) => (
+            <ManageMenuScreen {...props} addMenuItem={addMenuItem} />
+          )}
+        </Stack.Screen>
+        <Stack.Screen
+          name="Filter"
+          options={{ title: "Filter Menu by Course" }}
+          component={FilterScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>
